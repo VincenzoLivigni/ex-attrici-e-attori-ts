@@ -25,15 +25,6 @@ type Actress = Person & {
 }
 
 
-/*
-Crea una funzione getActress che, dato un id, effettua una chiamata a:
-
-GET /actresses/:id
-La funzione deve restituire l’oggetto Actress, se esiste, oppure null se non trovato.
-
-Utilizza un type guard chiamato isActress per assicurarti che la struttura del dato ricevuto sia corretta.
-*/
-
 function isActress(data: unknown): data is Actress {
   if (
     data &&
@@ -90,3 +81,35 @@ async function getActress(id: number): Promise<Actress | null> {
   }
 }
 console.log(await getActress(1))
+
+
+async function getAllActresses(): Promise<Actress[]> {
+  try {
+    const res = await fetch("http://localhost:3333/actresses")
+    if (!res.ok) {
+      throw new Error("Errore durante la ricezione dei dati")
+    }
+
+    const data: unknown = await res.json()
+    // se la chiamata non restituisce un array come risposta 
+    if (!(data instanceof Array)) {
+      throw new Error("La chiamata non restituisce un array")
+    }
+
+    // filtro e ritorno tutte le risposte che rispettano le condizioni
+    const arrActress = data.filter(isActress)
+    return arrActress
+  }
+  catch (err) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    } else {
+      console.log(err);
+    }
+
+    // in ogni caso in cui c'è un errore
+    return []
+  }
+}
+
+console.log(await getAllActresses());
